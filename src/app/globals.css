@@ -1,26 +1,99 @@
 @import "tailwindcss";
+@import "katex/dist/katex.min.css";
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #0f172a;
+  --sb-navy: #0a0e1a;
+  --sb-surface: #111827;
+  --sb-card: #1a2236;
+  --sb-border: #1e2d4a;
+  --sb-blue: #2563eb;
+  --sb-blue-light: #3b82f6;
+  --sb-gold: #f59e0b;
+  --sb-green: #10b981;
+  --sb-red: #ef4444;
+  --sb-text-secondary: #94a3b8;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
+
+/* Premium scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+
+/* Foresight gradient backgrounds */
+.foresight-bg {
+  background: radial-gradient(ellipse at top left, rgba(37,99,235,0.12) 0%, transparent 60%),
+              radial-gradient(ellipse at bottom right, rgba(245,158,11,0.08) 0%, transparent 60%),
+              var(--sb-navy);
+}
+
+.wealth-card {
+  background: linear-gradient(135deg, rgba(37,99,235,0.1) 0%, rgba(26,34,54,0.95) 100%);
+  border: 1px solid rgba(37,99,235,0.2);
+}
+
+.score-ring {
+  filter: drop-shadow(0 0 12px rgba(37,99,235,0.4));
+}
+
+.bear-gradient { stop-color: #ef4444; }
+.base-gradient { stop-color: #3b82f6; }
+.bull-gradient { stop-color: #10b981; }
+
+/* Smooth range input */
+input[type="range"] {
+  appearance: none;
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(to right, #2563eb, #3b82f6);
+  outline: none;
+}
+input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #2563eb;
+  cursor: pointer;
+  border: 3px solid white;
+  box-shadow: 0 2px 8px rgba(37,99,235,0.5);
+}
+
+/* Toast slide-in animation */
+@keyframes toastIn {
+  from { transform: translateX(2rem); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+.toast-in { animation: toastIn 0.25s ease-out forwards; }
+
+/* Pulse animation for intelligence cards */
+@keyframes pulseBorder {
+  0%, 100% { border-color: rgba(37,99,235,0.3); }
+  50% { border-color: rgba(37,99,235,0.7); }
+}
+.intelligence-card { animation: pulseBorder 3s ease-in-out infinite; }
+
+/* Glow effect for Wealth Score */
+@keyframes glowScore {
+  0%, 100% { filter: drop-shadow(0 0 8px rgba(37,99,235,0.4)); }
+  50% { filter: drop-shadow(0 0 16px rgba(37,99,235,0.7)); }
+}
+.score-glow { animation: glowScore 3s ease-in-out infinite; }
+
