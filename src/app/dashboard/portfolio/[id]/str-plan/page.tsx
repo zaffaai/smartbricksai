@@ -1,6 +1,7 @@
 "use client";
 import { useParams } from "next/navigation";
 import { PORTFOLIO_PROPERTIES } from "@/lib/data";
+import { useDemoAccount } from "@/lib/demo";
 import {
   BarChart,
   Bar,
@@ -21,10 +22,12 @@ import {
   CheckCircle2,
   AlertTriangle,
   Info,
+  Lock,
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/cn";
 import FeatureBadge from "@/components/shared/FeatureBadge";
+import InfoTooltip from "@/components/shared/InfoTooltip";
 
 // AI-projected monthly STR data — Autumn 2, JVC (1BR, 664 sqft)
 const MONTHLY_STR = [
@@ -77,6 +80,8 @@ const DEMAND_STYLE: Record<string, string> = {
 export default function STRPlanPage() {
   const { id } = useParams<{ id: string }>();
   const prop = PORTFOLIO_PROPERTIES.find((p) => p.id === id);
+  const { tier } = useDemoAccount();
+  const isFree = tier === "free";
 
   if (!prop || prop.offPlan) {
     return (
@@ -130,7 +135,7 @@ export default function STRPlanPage() {
         </div>
 
         {/* AI Recommendation Banner */}
-        <div className="rounded-2xl border border-blue-500/30 bg-gradient-to-r from-blue-900/20 to-transparent p-5">
+        <div className="rounded-2xl border border-blue-500/30 bg-linear-to-r from-blue-900/20 to-transparent p-5">
           <div className="flex items-start gap-3">
             <div className="w-10 h-10 rounded-xl bg-blue-600/25 border border-blue-500/40 flex items-center justify-center shrink-0">
               <Sparkles className="w-5 h-5 text-blue-300" />
@@ -186,7 +191,30 @@ export default function STRPlanPage() {
         </div>
 
         {/* Revenue chart + competitor table */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <div className="relative">
+          {isFree && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center bg-[#0a0e1a]/80 backdrop-blur-[2px] rounded-2xl">
+              <div className="text-center p-6 max-w-xs">
+                <Lock className="w-8 h-8 text-emerald-400 mx-auto mb-3" />
+                <p className="text-base font-bold text-white mb-1">
+                  You&apos;re leaving AED {uplift.toLocaleString()} on the table
+                </p>
+                <p className="text-sm text-slate-400 mb-4">
+                  Unlock the full STR optimization engine — monthly forecast, competitor benchmarks, and seasonal pricing calendar.
+                </p>
+                <Link
+                  href="/dashboard/foresight/report"
+                  className="flex items-center justify-center gap-2 w-full py-2.5 bg-emerald-500 text-black font-bold rounded-xl hover:bg-emerald-400 transition-colors text-sm"
+                >
+                  Unlock with Pro · AED 149/mo
+                </Link>
+                <p className="text-[11px] text-slate-500 mt-2">
+                  Pro pays for itself in &lt;1 month of STR uplift
+                </p>
+              </div>
+            </div>
+          )}
+          <div className={cn(isFree ? "opacity-40 blur-sm pointer-events-none select-none grid grid-cols-1 lg:grid-cols-2 gap-5" : "grid grid-cols-1 lg:grid-cols-2 gap-5")}>
 
           {/* Monthly revenue chart */}
           <div className="rounded-2xl border border-white/10 bg-white/3 p-5">
@@ -195,6 +223,11 @@ export default function STRPlanPage() {
                 <h2 className="text-sm font-bold text-white flex items-center gap-2">
                   <BarChart2 className="w-4 h-4 text-blue-400" />
                   AI Monthly Revenue Forecast
+                  <InfoTooltip
+                    content="AI projection of monthly STR revenue based on 18 months of JVC Airbnb occupancy data, DTCM holiday home licensing records, seasonal demand curves, and your unit's specific sqft and location score. Excludes DTCM license (~AED 2,800/yr) and management fees (~18% of revenue)."
+                    side="right"
+                    width="w-64"
+                  />
                 </h2>
                 <p className="text-xs text-slate-400">12-month STR projection</p>
               </div>
@@ -227,6 +260,11 @@ export default function STRPlanPage() {
               <h2 className="text-sm font-bold text-white flex items-center gap-2">
                 <Star className="w-4 h-4 text-amber-400" />
                 JVC Market Benchmark
+                <InfoTooltip
+                  content="AI analysis of 142 active short-term rental listings in Jumeirah Village Circle with comparable specifications (1BR, 600–730 sqft). Revenue and occupancy figures represent 30-day trailing averages from available DTCM and Airbnb public data. 'YOU' highlights where your unit ranks."
+                  side="right"
+                  width="w-64"
+                />
               </h2>
               <FeatureBadge variant="ai" />
             </div>
@@ -268,6 +306,7 @@ export default function STRPlanPage() {
               AI analysis of 142 comparable JVC listings · March 2026
             </p>
           </div>
+          </div>
         </div>
 
         {/* Monthly breakdown table */}
@@ -275,6 +314,11 @@ export default function STRPlanPage() {
           <h2 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
             <Calendar className="w-4 h-4 text-blue-400" />
             12-Month Booking Intelligence
+            <InfoTooltip
+              content="Month-by-month AI breakdown of projected occupancy, average nightly rate, and total revenue for this unit. Demand levels: Peak (Oct–Mar, Dubai tourist season) = 90%+ occupancy; High = 80–90%; Medium = 65–80%; Low = ≤65%. Rates fluctuate with demand."
+              side="right"
+              width="w-72"
+            />
           </h2>
           <div className="overflow-x-auto">
             <table className="w-full text-xs">

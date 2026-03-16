@@ -6,7 +6,8 @@ import GoldenVisaTracker from "@/components/portfolio/GoldenVisaTracker";
 import MetricTile from "@/components/shared/MetricTile";
 import ForesightChart from "@/components/foresight/ForesightChart";
 import FeatureBadge from "@/components/shared/FeatureBadge";
-import { PORTFOLIO_PROPERTIES } from "@/lib/data";
+import InfoTooltip from "@/components/shared/InfoTooltip";
+import { PORTFOLIO_PROPERTIES, ALERT_FEED } from "@/lib/data";
 import {
   DollarSign,
   TrendingUp,
@@ -24,10 +25,12 @@ import Image from "next/image";
 const totalValue = PORTFOLIO_PROPERTIES.reduce((s, p) => s + p.currentValue, 0);
 const totalPurchase = PORTFOLIO_PROPERTIES.reduce((s, p) => s + p.purchasePrice, 0);
 const avgRoi =
-  PORTFOLIO_PROPERTIES.reduce((s, p) => s + p.roi, 0) / PORTFOLIO_PROPERTIES.length;
+  PORTFOLIO_PROPERTIES.reduce((s, p) => s + p.roi * p.currentValue, 0) / totalValue;
+const readyProps = PORTFOLIO_PROPERTIES.filter((p) => !p.offPlan);
 const avgYield =
-  PORTFOLIO_PROPERTIES.filter((p) => !p.offPlan).reduce((s, p) => s + p.yield, 0) /
-  PORTFOLIO_PROPERTIES.filter((p) => !p.offPlan).length;
+  readyProps.length > 0
+    ? readyProps.reduce((s, p) => s + p.yield, 0) / readyProps.length
+    : 0;
 const totalGain = totalValue - totalPurchase;
 
 const WEALTH_SCORE = 724;
@@ -61,7 +64,7 @@ export default function PortfolioDashboard() {
               <Bell className="w-4 h-4" />
               Alerts
               <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
-                {4}
+                {ALERT_FEED.length}
               </span>
             </button>
             <Link
@@ -83,6 +86,7 @@ export default function PortfolioDashboard() {
             subPositive={true}
             accent="blue"
             icon={<DollarSign className="w-4 h-4" />}
+            tooltip="Total market value of all properties as estimated by the SmartBricks AVM today, based on DLD comparable transactions and live zone-alpha coefficients."
           />
           <MetricTile
             label="Average ROI"
@@ -91,6 +95,7 @@ export default function PortfolioDashboard() {
             subPositive={true}
             accent="green"
             icon={<TrendingUp className="w-4 h-4" />}
+            tooltip="Value-weighted average return on investment across all portfolio properties, calculated as sum(ROI × Value) / Total Portfolio Value. Excludes rental income."
           />
           <MetricTile
             label="Rental Yield"
@@ -99,13 +104,15 @@ export default function PortfolioDashboard() {
             subPositive={true}
             accent="amber"
             icon={<TrendingUp className="w-4 h-4" />}
+            tooltip="Annual gross rental income as a % of current property value for ready (non-off-plan) properties. Dubai zone benchmark is 6.5%. Above 8% is considered strong."
           />
           <MetricTile
             label="Properties"
             value={`${PORTFOLIO_PROPERTIES.length}`}
-            sub="1 Ready · 1 Off-Plan"
+            sub={`${PORTFOLIO_PROPERTIES.filter(p=>!p.offPlan).length} Ready · ${PORTFOLIO_PROPERTIES.filter(p=>p.offPlan).length} Off-Plan`}
             accent="slate"
             icon={<Building2 className="w-4 h-4" />}
+            tooltip="Total number of properties tracked in your portfolio. 'Ready' properties generate rental income now. 'Off-Plan' properties are under construction and generate capital growth only until delivery."
           />
         </div>
 
@@ -190,6 +197,11 @@ export default function PortfolioDashboard() {
                   <span className="text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-1.5 py-0.5 rounded font-semibold">
                     PRO
                   </span>
+                  <InfoTooltip
+                    content="SmartBricks Foresight is a 5-year property value prediction engine powered by a parameterised CAGR model: Vₜ = V₀ × (1 + r_base + α_zone + β_macro − δ_risk)^t. It generates Bear, Base, and Bull projections based on live DLD zone-alpha data and UAE macro indicators."
+                    side="bottom"
+                    width="w-72"
+                  />
                 </div>
                 <Link
                   href="/dashboard/foresight"
@@ -244,13 +256,20 @@ export default function PortfolioDashboard() {
             {/* Wealth Score */}
             <div className="rounded-2xl border border-white/10 bg-white/3 p-5">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-sm font-bold text-white">Wealth Score</h2>
+                <div className="flex items-center gap-1.5">
+                  <h2 className="text-sm font-bold text-white">Wealth Score</h2>
+                  <InfoTooltip
+                    content="AI-computed investment health score (0–1000) across 4 dimensions: Yield Efficiency (how well your rental income performs vs. zone benchmark), Capital Growth (5-year Foresight trajectory), Diversification (zone spread across portfolio), and Liquidity Ratio (% of ready vs. off-plan assets). Updated monthly."
+                    side="right"
+                    width="w-72"
+                  />
+                </div>
                 <div className="flex items-center gap-2">
                   <FeatureBadge variant="ai" />
                   <span className="text-xs text-slate-400">March 2026</span>
                 </div>
               </div>
-              <WealthScore score={WEALTH_SCORE} breakdown={SCORE_BREAKDOWN} />
+              <WealthScore score={WEALTH_SCORE} delta={12} breakdown={SCORE_BREAKDOWN} />
             </div>
 
             {/* Golden Visa Tracker */}
@@ -261,6 +280,11 @@ export default function PortfolioDashboard() {
               <div className="flex items-center gap-2 mb-4">
                 <h2 className="text-sm font-bold text-white">Invisible Intelligence</h2>
                 <FeatureBadge variant="ai" />
+                <InfoTooltip
+                  content="AI-generated signal cards that surface actionable insights you didn't know to look for — yield gaps, zone price movements, payment due reminders, and Golden Visa eligibility triggers. Ranked by urgency and financial impact."
+                  side="bottom"
+                  width="w-64"
+                />
               </div>
               <IntelligenceCards />
             </div>

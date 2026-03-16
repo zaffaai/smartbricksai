@@ -1,9 +1,10 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
-import { Send, Phone, Sparkles } from "lucide-react";
+import { Send, Phone, Sparkles, Lock } from "lucide-react";
 import { cn } from "@/lib/cn";
 import Link from "next/link";
 import FeatureBadge from "@/components/shared/FeatureBadge";
+import { useDemoAccount } from "@/lib/demo";
 
 interface Message {
   role: "user" | "ai";
@@ -21,10 +22,13 @@ function escapeHtml(s: string) {
 
 function renderAIMarkdown(content: string): string {
   return content
-    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*\*(.*?)\*\*/g, (_m, g1: string) => `<strong>${escapeHtml(g1)}</strong>`)
     .replace(
       /\[([^\]]+)\]\(([^)]+)\)/g,
-      '<a href="$2" class="text-blue-400 underline hover:text-blue-300 transition-colors">$1</a>'
+      (_m, text: string, href: string) => {
+        const safeHref = href.startsWith("/") || href.startsWith("http") ? href : "#";
+        return `<a href="${safeHref}" class="text-blue-400 underline hover:text-blue-300 transition-colors">${escapeHtml(text)}</a>`;
+      }
     )
     .replace(/\n/g, "<br/>");
 }
@@ -101,12 +105,35 @@ For AI-powered portfolio recommendations, try the **Foresight** tool or check yo
 [Open Portfolio →](/dashboard/portfolio) · [Foresight →](/dashboard/foresight)`;
 }
 
-const PRESEEDED_PROMPTS = [
-  "How do I evaluate if a property is a good long-term investment?",
-  "Estimate my ROI for a short-term rental apartment in Dubai",
-  "How much is the 4% DLD fee and other buying costs?",
-  "How do I estimate the rental yield for a property?",
-];
+const PROMPTS_BY_TYPE: Record<string, { label: string; prompts: string[] }> = {
+  general: {
+    label: "General investment questions about UAE property",
+    prompts: [
+      "How do I evaluate if a property is a good long-term investment?",
+      "Estimate my ROI for a short-term rental apartment in Dubai",
+      "How much is the 4% DLD fee and other buying costs?",
+      "How do I estimate the rental yield for a property?",
+    ],
+  },
+  new: {
+    label: "Guidance on finding and buying a new property",
+    prompts: [
+      "Which Dubai zone offers the best off-plan ROI in 2026?",
+      "What is the minimum investment for a Golden Visa eligible property?",
+      "How does the RERA escrow system protect off-plan buyers?",
+      "What are the best 1BR investment communities in JVC right now?",
+    ],
+  },
+  existing: {
+    label: "Optimise performance of your current portfolio",
+    prompts: [
+      "Should I switch Autumn 2 (JVC) to short-term rental this year?",
+      "How close am I to Golden Visa eligibility with my current portfolio?",
+      "What is the optimal exit window for my JVC property?",
+      "How do I refinance in the UAE to release equity from Autumn 2?",
+    ],
+  },
+};
 
 export default function AdvisorPage() {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -114,15 +141,32 @@ export default function AdvisorPage() {
   const [loading, setLoading] = useState(false);
   const [chatType, setChatType] = useState<"general" | "new" | "existing">("general");
   const bottomRef = useRef<HTMLDivElement>(null);
+  const { tier, account } = useDemoAccount();
+
+  // Free tier: 3 queries/month limit
+  const FREE_LIMIT = 3;
+  const isFree = tier === "free";
+  const QUERY_KEY = `sb_advisor_queries_${account.id}`;
+  const [persistedCount, setPersistedCount] = useState<number>(() => {
+    if (typeof window === "undefined") return 0;
+    return parseInt(localStorage.getItem(QUERY_KEY) ?? "0", 10);
+  });
+  const queryCount = persistedCount;
+  const limitReached = isFree && queryCount >= FREE_LIMIT;
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   const sendMessage = (text: string) => {
-    if (!text.trim()) return;
+    if (!text.trim() || limitReached) return;
     const userMsg: Message = { role: "user", content: text, ts: new Date().toLocaleTimeString() };
     setMessages((m) => [...m, userMsg]);
+    if (isFree) {
+      const next = persistedCount + 1;
+      setPersistedCount(next);
+      localStorage.setItem(QUERY_KEY, String(next));
+    }
     setInput("");
     setLoading(true);
     setTimeout(() => {
@@ -164,12 +208,8 @@ export default function AdvisorPage() {
         </div>
 
         {/* Chat type selector */}
-        <div className="flex gap-2 mb-4">
-          {[
-            { id: "general", label: "General" },
-            { id: "new", label: "New Property" },
-            { id: "existing", label: "Existing Property" },
-          ].map(({ id, label }) => (
+        <div className="flex gap-2 mb-4 flex-wrap">
+          {(Object.entries(PROMPTS_BY_TYPE) as [string, { label: string; prompts: string[] }][]).map(([id, { label }]) => (
             <button
               key={id}
               onClick={() => setChatType(id as typeof chatType)}
@@ -179,8 +219,9 @@ export default function AdvisorPage() {
                   ? "bg-blue-600 text-white border-blue-600"
                   : "bg-white/5 text-slate-400 border-white/10 hover:border-white/20"
               )}
+              title={label}
             >
-              {label}
+              {id === "general" ? "General" : id === "new" ? "New Property" : "Existing Property"}
             </button>
           ))}
         </div>
@@ -198,11 +239,11 @@ export default function AdvisorPage() {
                   </div>
                   <h2 className="text-lg font-bold text-white">Hi, how can I help?</h2>
                   <p className="text-sm text-slate-400 mt-1">
-                    Find your perfect property investment with AI-driven insights.
+                    {PROMPTS_BY_TYPE[chatType].label}
                   </p>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full max-w-lg">
-                  {PRESEEDED_PROMPTS.map((prompt) => (
+                  {PROMPTS_BY_TYPE[chatType].prompts.map((prompt) => (
                     <button
                       key={prompt}
                       onClick={() => sendMessage(prompt)}
@@ -283,7 +324,43 @@ export default function AdvisorPage() {
           </div>
 
           {/* Input bar */}
-          <div className="p-4 border-t border-white/10">
+          <div className="p-4 border-t border-white/10 space-y-2">
+            {/* Free tier limit banner */}
+            {isFree && (
+              <div className={cn(
+                "flex items-center justify-between rounded-xl px-3 py-2 text-xs border",
+                limitReached
+                  ? "bg-red-500/10 border-red-500/30 text-red-300"
+                  : "bg-white/4 border-white/10 text-slate-400"
+              )}>
+                <div className="flex items-center gap-1.5">
+                  {limitReached
+                    ? <Lock className="w-3 h-3" />
+                    : <Sparkles className="w-3 h-3 text-blue-400" />}
+                  {limitReached
+                    ? <span>Free limit reached ({FREE_LIMIT}/{FREE_LIMIT} queries used) · Upgrade to Pro for unlimited access</span>
+                    : <span>{account.name} · Free tier · {FREE_LIMIT - queryCount} of {FREE_LIMIT} queries remaining this month</span>
+                  }
+                </div>
+                {limitReached && (
+                  <Link
+                    href="/dashboard/foresight/report"
+                    className="text-[10px] font-bold text-amber-400 hover:text-amber-300 shrink-0 ml-2"
+                  >
+                    Upgrade →
+                  </Link>
+                )}
+              </div>
+            )}
+
+            {/* Pro/Transaction tier label */}
+            {!isFree && (
+              <div className="flex items-center gap-1.5 text-[10px] text-slate-600">
+                <Sparkles className="w-3 h-3 text-blue-500" />
+                {account.name} · {tier === "transaction" ? "Transaction" : "Pro"} — unlimited queries
+              </div>
+            )}
+
             <form
               onSubmit={(e) => { e.preventDefault(); sendMessage(input); }}
               className="flex gap-2"
@@ -292,12 +369,17 @@ export default function AdvisorPage() {
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask about your portfolio, yields, visas, or any UAE market question..."
-                className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/50 focus:bg-white/8 transition-all"
+                disabled={limitReached}
+                placeholder={
+                  limitReached
+                    ? "Upgrade to Pro to continue the conversation..."
+                    : "Ask about your portfolio, yields, visas, or any UAE market question..."
+                }
+                className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/50 focus:bg-white/8 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
               />
               <button
                 type="submit"
-                disabled={!input.trim() || loading}
+                disabled={!input.trim() || loading || limitReached}
                 className="px-4 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
                 <Send className="w-4 h-4" />

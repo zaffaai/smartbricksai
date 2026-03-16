@@ -1,11 +1,12 @@
 "use client";
-import { Search, SlidersHorizontal, MapPin, TrendingUp, Star, Heart, ExternalLink, Sparkles, X } from "lucide-react";
+import { Search, SlidersHorizontal, MapPin, TrendingUp, Star, Heart, Sparkles, X } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/cn";
 import Link from "next/link";
 import Image from "next/image";
 import { useToast } from "@/components/shared/Toast";
 import FeatureBadge from "@/components/shared/FeatureBadge";
+import InfoTooltip from "@/components/shared/InfoTooltip";
 
 // Sample listings derived from live site data
 const LISTINGS = [
@@ -210,7 +211,7 @@ export default function ExplorePage() {
               className="w-full pl-9 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500 transition-colors"
             />
           </div>
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm text-gray-700 hover:border-gray-300 transition-colors">
+          <div className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm text-gray-700 hover:border-gray-300 transition-colors">
             <MapPin className="w-4 h-4 text-gray-400" />
             <select
               value={filterZone}
@@ -225,7 +226,7 @@ export default function ExplorePage() {
               <option value="Palm Jumeirah">Palm Jumeirah</option>
               <option value="Business Bay">Business Bay</option>
             </select>
-          </button>
+          </div>
           <button
             onClick={() => setShowFilters(!showFilters)}
             className={cn(
@@ -391,13 +392,12 @@ export default function ExplorePage() {
                 {/* Save button */}
                 <button
                   onClick={() => {
+                    const wasAlreadySaved = saved.has(listing.id);
                     toggleSave(listing.id);
-                    if (!saved.has(listing.id)) {
-                      toast(
-                        saved.has(listing.id) ? "Removed from watchlist" : `${listing.name} saved!`,
-                        { description: "Find your saved properties in Portfolio → Watchlist.", type: "success" }
-                      );
-                    }
+                    toast(
+                      wasAlreadySaved ? "Removed from watchlist" : `${listing.name} saved!`,
+                      { description: wasAlreadySaved ? "Property removed from your saved list." : "Find your saved properties in Portfolio → Watchlist.", type: wasAlreadySaved ? "info" : "success" }
+                    );
                   }}
                   className="absolute top-3 right-3 p-1.5 bg-white/90 rounded-full hover:bg-white transition-colors"
                 >
@@ -410,6 +410,11 @@ export default function ExplorePage() {
                   <div className="absolute bottom-3 left-3 flex items-center gap-1 bg-black/70 text-white text-[10px] px-2 py-1 rounded-lg">
                     <TrendingUp className="w-3 h-3 text-emerald-400" />
                     {listing.roi}% Annual ROI
+                    <InfoTooltip
+                      content="Projected annual return on investment vs. purchase price. Includes capital appreciation (Foresight model) + gross rental yield. Does not deduct DLD fees or service charges."
+                      side="right"
+                      width="w-60"
+                    />
                   </div>
                 )}
               </div>
@@ -442,6 +447,10 @@ export default function ExplorePage() {
                     <div className="flex items-center gap-1 shrink-0">
                       <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
                       <span className="text-xs font-bold text-gray-700">{listing.score}%</span>
+                      <InfoTooltip
+                        content="SmartBricks Investment Score: AI composite of 600+ data points including zone trajectory, yield efficiency, developer track record, and liquidity ratio. ≥90% = strong buy signal."
+                        side="left"
+                      />
                     </div>
                   </div>
                   <p className="text-xs text-gray-500">{listing.community}</p>
@@ -465,14 +474,26 @@ export default function ExplorePage() {
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-xs font-semibold text-emerald-600">
+                    <p className="text-xs font-semibold text-emerald-600 flex items-center gap-1 justify-end">
                       {listing.belowMarket}% Below SmartBricks valuation
+                      <InfoTooltip
+                        content="SmartBricks AVM (Automated Valuation Model) estimated this property's fair value using DLD comparable transactions and zone-level alpha. A positive gap means the listing price is below our model's estimated market value — a potential upside opportunity."
+                        side="left"
+                        width="w-64"
+                      />
                     </p>
                     {listing.yield > 0 && (
                       <p className="text-[10px] text-gray-400">Yield: {listing.yield}%</p>
                     )}
                     {listing.goldenVisa && (
-                      <p className="text-[10px] text-amber-600 font-semibold">🇦🇪 Golden Visa</p>
+                      <p className="text-[10px] text-amber-600 font-semibold flex items-center gap-1">
+                        🇦🇪 Golden Visa
+                        <InfoTooltip
+                          content="UAE Golden Visa eligibility requires a minimum AED 2M property investment. This property qualifies. Golden Visa grants 10-year UAE residency."
+                          side="left"
+                          width="w-56"
+                        />
+                      </p>
                     )}
                   </div>
                 </div>

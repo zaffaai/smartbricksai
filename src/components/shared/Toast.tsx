@@ -66,7 +66,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   return (
     <ToastCtx.Provider value={{ toast }}>
       {children}
-      <div className="fixed bottom-5 right-5 z-[200] flex flex-col gap-2.5 pointer-events-none w-[320px] max-w-[calc(100vw-2.5rem)]">
+      <div className="fixed bottom-5 right-5 z-200 flex flex-col gap-2.5 pointer-events-none w-[320px] max-w-[calc(100vw-2.5rem)]">
         {toasts.map((t) => {
           const Icon = ICON[t.type];
           return (

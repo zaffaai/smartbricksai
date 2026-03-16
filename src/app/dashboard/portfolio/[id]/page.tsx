@@ -16,6 +16,7 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 import { cn } from "@/lib/cn";
+import InfoTooltip from "@/components/shared/InfoTooltip";
 
 export default function PropertyAssetPage() {
   const { id } = useParams<{ id: string }>();
@@ -81,8 +82,13 @@ export default function PropertyAssetPage() {
                       🇦🇪 Golden Visa Eligible
                     </span>
                   )}
-                  <span className="text-xs bg-blue-600/20 text-blue-300 px-2 py-0.5 rounded font-bold">
+                  <span className="text-xs bg-blue-600/20 text-blue-300 px-2 py-0.5 rounded font-bold flex items-center gap-1">
                     Score {prop.smartbricksScore}%
+                    <InfoTooltip
+                      content="SmartBricks Investment Score (0–100): AI composite across yield efficiency, capital growth trajectory, zone liquidity score, and developer track record. ≥90% = strong buy / hold signal."
+                      side="bottom"
+                      width="w-56"
+                    />
                   </span>
                 </div>
               </div>
@@ -90,8 +96,8 @@ export default function PropertyAssetPage() {
                 <p className="text-2xl font-bold text-white">
                   AED {(prop.currentValue / 1000000).toFixed(2)}M
                 </p>
-                <p className="text-sm font-medium text-emerald-400">
-                  +{gainPct}% · +AED {(gain / 1000).toFixed(0)}K
+                <p className={`text-sm font-medium ${gain >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                  {gain >= 0 ? "+" : ""}{gainPct}% · {gain >= 0 ? "+" : ""}AED {(gain / 1000).toFixed(0)}K
                 </p>
                 <p className="text-xs text-slate-500 mt-0.5">
                   Purchased AED {(prop.purchasePrice / 1000000).toFixed(2)}M · {prop.purchaseDate}
@@ -104,13 +110,16 @@ export default function PropertyAssetPage() {
         {/* Metrics row */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
-            { label: "Annual ROI", value: `${prop.roi}%`, sub: "vs 8% market avg", positive: true },
-            { label: "Rental Yield", value: prop.yield > 0 ? `${prop.yield}%` : "Off-Plan", sub: prop.yield > 0 ? `Zone avg: 6.5%` : "Delivery 2027", positive: prop.yield > benchmarkYield },
-            { label: "Bedrooms", value: `${prop.bedrooms} BR`, sub: `${prop.sqft.toLocaleString()} sq ft` },
-            { label: "SmartBricks Val.", value: `AED ${(prop.currentValue / 1000000).toFixed(2)}M`, sub: `+${gainPct}% above purchase`, positive: true },
-          ].map(({ label, value, sub, positive }) => (
+            { label: "Annual ROI", value: `${prop.roi}%`, sub: "vs 8% market avg", positive: true, tip: "Return on investment calculated as (Current AVM Value − Purchase Price) / Purchase Price. Measures capital appreciation only; excludes rental income." },
+            { label: "Rental Yield", value: prop.yield > 0 ? `${prop.yield}%` : "Off-Plan", sub: prop.yield > 0 ? `Zone avg: 6.5%` : "Delivery 2027", positive: prop.yield > benchmarkYield, tip: prop.yield > 0 ? "Annual gross rental income ÷ current property value. Dubai zone average is 6.5%. Above 8% is considered high-yield. Gross yield does not deduct service charges or vacancy." : "Off-plan properties do not generate rental income until handover. Capital appreciation applies during construction." },
+            { label: "Bedrooms", value: `${prop.bedrooms} BR`, sub: `${prop.sqft.toLocaleString()} sq ft`, tip: undefined },
+            { label: "SmartBricks Val.", value: `AED ${(prop.currentValue / 1000000).toFixed(2)}M`, sub: `+${gainPct}% above purchase`, positive: true, tip: "SmartBricks Automated Valuation Model (AVM): estimated fair market value based on DLD comparable transactions in the same zone, bedroom count, and sqft range within the past 90 days, adjusted by the live zone-alpha coefficient." },
+          ].map(({ label, value, sub, positive, tip }) => (
             <div key={label} className="rounded-2xl border border-white/10 bg-white/3 p-4">
-              <p className="text-xs text-slate-400 mb-1 font-medium">{label}</p>
+              <p className="text-xs text-slate-400 mb-1 font-medium flex items-center gap-1">
+                {label}
+                {tip && <InfoTooltip content={tip} side="bottom" width="w-56" />}
+              </p>
               <p className="text-lg font-bold text-white">{value}</p>
               <p className={cn("text-xs mt-0.5", positive ? "text-emerald-400" : "text-slate-400")}>
                 {sub}
@@ -153,7 +162,14 @@ export default function PropertyAssetPage() {
             {/* Yield Optimization Module */}
             {!prop.offPlan && (
               <div className="rounded-2xl border border-white/10 bg-white/3 p-5">
-                <h2 className="text-sm font-bold text-white mb-3">Rental Yield Optimizer</h2>
+                <h2 className="text-sm font-bold text-white mb-3 flex items-center gap-1.5">
+                  Rental Yield Optimizer
+                  <InfoTooltip
+                    content="Compares your current long-term rental yield against the zone benchmark and estimated short-term rental (STR / Airbnb) yield. STR yield is estimated from DTCM occupancy data and comparable JVC Airbnb listings. Includes net yield after DTCM licensing fees."
+                    side="right"
+                    width="w-64"
+                  />
+                </h2>
                 <div className="space-y-3">
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-slate-400">Your current yield</span>
@@ -261,7 +277,14 @@ export default function PropertyAssetPage() {
             {/* DLD Recent Sales */}
             <div className="rounded-2xl border border-white/10 bg-white/3 p-5">
               <div className="flex items-center justify-between mb-3">
-                <h2 className="text-sm font-bold text-white">DLD Comparable Sales</h2>
+                <h2 className="text-sm font-bold text-white flex items-center gap-1.5">
+                  DLD Comparable Sales
+                  <InfoTooltip
+                    content="Actual Dubai Land Department (DLD) registered sale transactions in the same zone and bedroom category from the past 90 days. These are official public registry transactions, not listing prices. Used to cross-validate the SmartBricks AVM."
+                    side="right"
+                    width="w-64"
+                  />
+                </h2>
                 <span className="text-xs text-slate-500">Last 90 days</span>
               </div>
               <div className="overflow-x-auto">
@@ -293,7 +316,14 @@ export default function PropertyAssetPage() {
 
             {/* Document Vault */}
             <div className="rounded-2xl border border-white/10 bg-white/3 p-5">
-              <h2 className="text-sm font-bold text-white mb-3">Document Vault</h2>
+              <h2 className="text-sm font-bold text-white mb-3 flex items-center gap-1.5">
+                Document Vault
+                <InfoTooltip
+                  content="Secure storage for all legal property documents: SPA (Sales Purchase Agreement), Title Deed, NOC (No Objection Certificate), and DLD Receipts. In production, documents are stored in user-scoped encrypted buckets with zero cross-user access. AI Vault Scanner (Pro) will extract key clauses and flag non-standard terms."
+                  side="right"
+                  width="w-72"
+                />
+              </h2>
               <div className="space-y-2">
                 {[
                   { name: "Sales Purchase Agreement (SPA)", status: "available" },

@@ -1,6 +1,7 @@
 "use client";
 import { ReactNode } from "react";
 import { cn } from "@/lib/cn";
+import InfoTooltip from "@/components/shared/InfoTooltip";
 
 interface MetricTileProps {
   label: string;
@@ -9,6 +10,7 @@ interface MetricTileProps {
   subPositive?: boolean;
   icon?: ReactNode;
   accent?: "blue" | "green" | "amber" | "slate";
+  tooltip?: string;
 }
 
 const accents = {
@@ -25,6 +27,7 @@ export default function MetricTile({
   subPositive,
   icon,
   accent = "slate",
+  tooltip,
 }: MetricTileProps) {
   return (
     <div
@@ -35,8 +38,9 @@ export default function MetricTile({
     >
       {icon && <div className="text-slate-400">{icon}</div>}
       <div>
-        <p className="text-xs text-slate-400 font-medium uppercase tracking-wider mb-1">
+        <p className="text-xs text-slate-400 font-medium uppercase tracking-wider mb-1 flex items-center gap-1">
           {label}
+          {tooltip && <InfoTooltip content={tooltip} side="bottom" />}
         </p>
         <p className="text-2xl font-bold text-white leading-tight">{value}</p>
         {sub && (

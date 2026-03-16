@@ -1,5 +1,4 @@
 "use client";
-import { useToast } from "@/components/shared/Toast";
 import Link from "next/link";
 
 interface GoldenVisaTrackerProps {
@@ -11,7 +10,6 @@ export default function GoldenVisaTracker({
   portfolioValue,
   threshold = 2000000,
 }: GoldenVisaTrackerProps) {
-  const { toast } = useToast();
   const pct = Math.min((portfolioValue / threshold) * 100, 100);
   const eligible = portfolioValue >= threshold;
   const gap = Math.max(threshold - portfolioValue, 0);
@@ -64,21 +62,14 @@ export default function GoldenVisaTracker({
             ✅ Your portfolio (AED {(portfolioValue / 1000000).toFixed(2)}M) exceeds the AED 2M DLD threshold. You are eligible for the 10-year UAE Golden Visa.
           </p>
           <div className="flex flex-col gap-2 mt-2">
-            <button
-              onClick={() =>
-                toast(
-                  "Golden Visa — You Qualify! 🇦🇪",
-                  {
-                    description:
-                      "Book a SmartBricks consultation to start your GDRFA application. We manage the full process.",
-                    type: "success",
-                  }
-                )
-              }
-              className="w-full text-xs bg-amber-500 text-black font-bold py-1.5 rounded-lg hover:bg-amber-400 transition-colors"
+            <Link
+              href="https://calendly.com/d/csz4-4hq-m39/smart-bricks-investment-consultation"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full block text-center text-xs bg-amber-500 text-black font-bold py-1.5 rounded-lg hover:bg-amber-400 transition-colors"
             >
               Start Application →
-            </button>
+            </Link>
             <Link
               href="https://calendly.com/d/csz4-4hq-m39/smart-bricks-investment-consultation"
               target="_blank"

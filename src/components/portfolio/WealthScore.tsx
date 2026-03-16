@@ -2,10 +2,11 @@
 
 interface WealthScoreProps {
   score: number; // 0–1000
+  delta?: number;
   breakdown?: { label: string; value: number; max: number; color: string }[];
 }
 
-export default function WealthScore({ score, breakdown }: WealthScoreProps) {
+export default function WealthScore({ score, delta, breakdown }: WealthScoreProps) {
   const pct = score / 1000;
   const radius = 52;
   const circumference = 2 * Math.PI * radius;
@@ -58,6 +59,11 @@ export default function WealthScore({ score, breakdown }: WealthScoreProps) {
             {getLabel(score)}
           </span>
           <span className="text-[10px] text-slate-400 mt-0.5">/1000</span>
+          {delta !== undefined && delta !== 0 && (
+            <span className={`text-[10px] font-bold mt-0.5 ${delta > 0 ? "text-emerald-400" : "text-red-400"}`}>
+              {delta > 0 ? `↑ +${delta}` : `↓ ${delta}`} this month
+            </span>
+          )}
         </div>
       </div>
 

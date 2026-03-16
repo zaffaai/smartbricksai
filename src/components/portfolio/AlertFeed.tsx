@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   Info,
   ArrowRight,
+  Clock,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -41,6 +42,16 @@ export default function AlertFeed() {
                   <span className="text-xs text-slate-500 shrink-0 mt-0.5">{alert.time}</span>
                 </div>
                 <p className="text-xs text-slate-400 mt-1 leading-relaxed">{alert.body}</p>
+                {"daysLeft" in alert && typeof (alert as { daysLeft?: number }).daysLeft === "number" && (
+                  <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full mt-1.5 ${
+                    (alert as { daysLeft: number }).daysLeft <= 14
+                      ? "bg-red-500/20 text-red-400 border border-red-500/30"
+                      : "bg-amber-500/20 text-amber-300 border border-amber-500/30"
+                  }`}>
+                    <Clock className="w-2.5 h-2.5" />
+                    {(alert as { daysLeft: number }).daysLeft} days remaining
+                  </span>
+                )}
                 <Link
                   href={alert.actionHref}
                   className={cn(
