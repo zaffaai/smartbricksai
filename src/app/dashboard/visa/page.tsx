@@ -10,6 +10,7 @@ import {
 import { PORTFOLIO_PROPERTIES } from "@/lib/data";
 import { useDemoAccount } from "@/lib/demo";
 import { cn } from "@/lib/cn";
+import MonetizationTooltip from "@/components/shared/MonetizationTooltip";
 
 /* ─── Portfolio data ─── */
 const totalValue = PORTFOLIO_PROPERTIES.reduce((s, p) => s + p.currentValue, 0);
@@ -170,11 +171,12 @@ export default function VisaPage() {
               <div className="flex items-center gap-3 mb-3">
                 <span className="text-3xl">🇦🇪</span>
                 <div>
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-lg font-bold text-white">
-                      UAE 10-Year Golden Visa
-                    </h2>
-                    {eligible && (
+            <div className="flex items-center gap-2 mb-1">
+              <h2 className="text-lg font-bold text-white">
+                UAE 10-Year Golden Visa
+              </h2>
+              <MonetizationTooltip content="💰 Transaction Revenue + Pro Retention | 1.5% of deal value — Golden Visa eligibility unlocks a property transaction (AED 2M+), earning SmartBricks AED 30K+ per qualifying referral." side="bottom" width="w-80" />
+              {eligible && (
                       <span className="text-xs bg-amber-500 text-black font-bold px-2 py-0.5 rounded-full">
                         ELIGIBLE ✓
                       </span>
@@ -265,6 +267,7 @@ export default function VisaPage() {
           <div className="px-5 pt-5 pb-3 flex items-center gap-2 border-b border-white/8">
             <Sparkles className="w-4 h-4 text-blue-400" />
             <h2 className="text-sm font-bold text-white">AI Application Wizard</h2>
+            <MonetizationTooltip content="💰 Pro Feature + Consultation Funnel | AED 149/mo MRR + AED 500–2,000 consultation fee — the wizard guides users to book a paid consultation call for end-to-end visa submission." side="bottom" width="w-80" />
             <span className="text-[10px] text-blue-400 bg-blue-500/15 border border-blue-500/20 px-1.5 py-0.5 rounded-full ml-auto">
               Step {activeStep} of {WIZARD_STEPS.length}
             </span>
@@ -402,6 +405,7 @@ export default function VisaPage() {
             <div className="flex items-center gap-2">
               <Users className="w-4 h-4 text-blue-400" />
               <h2 className="text-sm font-bold text-white">Family Sponsorship Calculator</h2>
+              <MonetizationTooltip content="💰 Engagement Stickiness → Pro Retention | AED 149/mo MRR — family sponsorship involvement emotionally anchors users (they’re protecting their family’s UAE status), dramatically increasing Pro retention." side="bottom" width="w-80" />
             </div>
             <p className="text-xs text-slate-400">
               Your 10-year Golden Visa covers you, your spouse, and unmarried children under 25. Adjust below to see who qualifies.
@@ -485,6 +489,7 @@ export default function VisaPage() {
               <h2 className="text-sm font-bold text-white">
                 {eligible ? "Protect Your Eligibility" : "Gap Funding Advisor"}
               </h2>
+              <MonetizationTooltip content="💰 Transaction Revenue | 1.5% of deal value — the Gap Funding Advisor surfaces qualifying properties to close the AED 2M gap, each referral worth AED 13K–22K in transaction commission." side="bottom" width="w-80" />
             </div>
 
             {eligible ? (

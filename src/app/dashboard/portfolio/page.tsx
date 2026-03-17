@@ -7,6 +7,8 @@ import MetricTile from "@/components/shared/MetricTile";
 import ForesightChart from "@/components/foresight/ForesightChart";
 import FeatureBadge from "@/components/shared/FeatureBadge";
 import InfoTooltip from "@/components/shared/InfoTooltip";
+import MonetizationTooltip from "@/components/shared/MonetizationTooltip";
+import { useDemoAccount } from "@/lib/demo";
 import { PORTFOLIO_PROPERTIES, ALERT_FEED } from "@/lib/data";
 import {
   DollarSign,
@@ -42,6 +44,8 @@ const SCORE_BREAKDOWN = [
 ];
 
 export default function PortfolioDashboard() {
+  const { tier } = useDemoAccount();
+  const isFree = tier === "free";
   return (
     <div className="foresight-bg min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
@@ -125,7 +129,10 @@ export default function PortfolioDashboard() {
             {/* Property cards */}
             <div className="rounded-2xl border border-white/10 bg-white/3 p-5">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-sm font-bold text-white">My Properties</h2>
+                <div className="flex items-center gap-1.5">
+                  <h2 className="text-sm font-bold text-white">My Properties</h2>
+                  <MonetizationTooltip content="💰 Free Tier Hook → Pro Conversion | AED 149/mo MRR — portfolio tracking is the free feature that converts casual users into paying Pro subscribers." side="bottom" width="w-72" />
+                </div>
                 <Link href="/dashboard/property" className="text-xs text-blue-400 flex items-center gap-1 hover:text-blue-300">
                   Add more <ArrowRight className="w-3 h-3" />
                 </Link>
@@ -194,6 +201,7 @@ export default function PortfolioDashboard() {
                 <div className="flex items-center gap-2">
                   <TrendingUp className="w-4 h-4 text-blue-400" />
                   <h2 className="text-sm font-bold text-white">Foresight Preview</h2>
+                  <MonetizationTooltip content="💰 Core Pro Revenue | AED 149/mo MRR — the 5-year projection chart is the #1 upgrade driver. Full chart is Pro-gated; preview here creates the desire to unlock." side="bottom" width="w-72" />
                   <span className="text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-1.5 py-0.5 rounded font-semibold">
                     PRO
                   </span>
@@ -217,28 +225,38 @@ export default function PortfolioDashboard() {
                 alphaZone={PORTFOLIO_PROPERTIES[0].alphaZone}
                 compact
               />
-              {/* Upgrade gate */}
-              <div className="mt-4 relative rounded-xl overflow-hidden">
-                <div className="absolute inset-0 bg-[#0a0e1a]/80 backdrop-blur-sm flex flex-col items-center justify-center z-10 gap-2">
-                  <Lock className="w-5 h-5 text-amber-400" />
-                  <p className="text-xs font-semibold text-white">Full Foresight unlocked in Pro</p>
+              {/* Foresight gate — upgrade prompt for free tier, link for pro */}
+              {isFree ? (
+                <div className="mt-4 relative rounded-xl overflow-hidden">
+                  <div className="absolute inset-0 bg-[#0a0e1a]/80 backdrop-blur-sm flex flex-col items-center justify-center z-10 gap-2">
+                    <Lock className="w-5 h-5 text-amber-400" />
+                    <p className="text-xs font-semibold text-white">Full Foresight unlocked in Pro</p>
+                    <Link
+                      href="/dashboard/foresight"
+                      className="text-xs bg-amber-500 text-black font-bold px-3 py-1.5 rounded-lg hover:bg-amber-400 transition-colors"
+                    >
+                      Upgrade to Pro — AED 149/mo
+                    </Link>
+                  </div>
+                  <div className="h-12" />
+                </div>
+              ) : (
+                <div className="mt-3 flex items-center justify-center">
                   <Link
                     href="/dashboard/foresight"
-                    className="text-xs bg-amber-500 text-black font-bold px-3 py-1.5 rounded-lg hover:bg-amber-400 transition-colors"
+                    className="flex items-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 font-medium transition-colors"
                   >
-                    Upgrade to Pro — AED 149/mo
+                    Open full 5-year analysis <ArrowRight className="w-3 h-3" />
                   </Link>
                 </div>
-                <div className="h-12" />
-              </div>
+              )}
             </div>
 
             {/* Alert Feed */}
             <div className="rounded-2xl border border-white/10 bg-white/3 p-5">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <h2 className="text-sm font-bold text-white">Market Intelligence Feed</h2>
-                  <FeatureBadge variant="ai" />
+                  <h2 className="text-sm font-bold text-white">Market Intelligence Feed</h2>                  <MonetizationTooltip content="💰 Engagement Anchor → Pro Retention | AED 149/mo MRR — real-time market alerts create daily platform visits and make investors anxious to miss out without a Pro subscription." side="bottom" width="w-72" />                  <FeatureBadge variant="ai" />
                 </div>
                 <span className="text-xs bg-red-500/20 text-red-400 px-2 py-0.5 rounded-full font-medium">
                   4 new alerts
@@ -257,8 +275,7 @@ export default function PortfolioDashboard() {
             <div className="rounded-2xl border border-white/10 bg-white/3 p-5">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-1.5">
-                  <h2 className="text-sm font-bold text-white">Wealth Score</h2>
-                  <InfoTooltip
+                  <h2 className="text-sm font-bold text-white">Wealth Score</h2>                  <MonetizationTooltip content="💰 Vanity Metric → Pro Anchor | AED 149/mo MRR — the score creates an emotional benchmark (investors want to improve it) that sustains Pro subscription month after month." side="left" width="w-72" />                  <InfoTooltip
                     content="AI-computed investment health score (0–1000) across 4 dimensions: Yield Efficiency (how well your rental income performs vs. zone benchmark), Capital Growth (5-year Foresight trajectory), Diversification (zone spread across portfolio), and Liquidity Ratio (% of ready vs. off-plan assets). Updated monthly."
                     side="right"
                     width="w-72"
@@ -293,9 +310,12 @@ export default function PortfolioDashboard() {
             <div className="rounded-2xl bg-linear-to-br from-blue-600 to-blue-800 p-5 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2" />
               <div className="relative z-10">
-                <p className="text-xs font-semibold text-blue-200 uppercase tracking-wider mb-1">
-                  Premium Report
-                </p>
+                <div className="flex items-center gap-2 mb-1">
+                  <p className="text-xs font-semibold text-blue-200 uppercase tracking-wider">
+                    Premium Report
+                  </p>
+                  <MonetizationTooltip content="💰 One-Time Revenue | AED 299/report — the PDF report is a standalone upsell accessible to free-tier users. Also converts buyers into Pro subscribers (AED 149/mo for unlimited reports)." side="top" width="w-72" />
+                </div>
                 <p className="text-base font-bold text-white mb-2">
                   Full AI Foresight Report
                 </p>

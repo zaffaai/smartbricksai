@@ -8,6 +8,7 @@ import { cn } from "@/lib/cn";
 import { Lock, FileText, Download, Star } from "lucide-react";
 import Link from "next/link";
 import InfoTooltip from "@/components/shared/InfoTooltip";
+import MonetizationTooltip from "@/components/shared/MonetizationTooltip";
 
 const fmt = (v: number) =>
   v >= 1000000
@@ -37,9 +38,12 @@ export default function ForesightPage() {
               </span>
             </div>
             <h1 className="text-xl font-bold text-white">Smartbricks Foresight</h1>
-            <p className="text-sm text-slate-400 mt-0.5">
-              5-year property value prediction engine · UAE market
-            </p>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <p className="text-sm text-slate-400">
+                5-year property value prediction engine · UAE market
+              </p>
+              <MonetizationTooltip content="💰 Core Pro Revenue | AED 149/mo MRR + AED 299/report — the Foresight engine is the primary Pro lock-in feature. Full 5-year projections are Pro-gated; reports are sold as a standalone one-time fee." side="bottom" width="w-80" />
+            </div>
           </div>
           <Link
             href="/dashboard/foresight/report"
@@ -150,6 +154,7 @@ export default function ForesightPage() {
             <div className="rounded-2xl border border-white/10 bg-white/3 p-4">
               <div className="flex items-center gap-1.5 mb-3">
                 <p className="text-xs font-semibold text-white">Zone Premium Map</p>
+                <MonetizationTooltip content="💰 Data Moat → Pro Retention | AED 149/mo MRR — proprietary zone-alpha coefficients built from DLD data are the platform's defensible moat. Subscribers pay to access this edge over the open market." side="right" width="w-72" />
                 <InfoTooltip
                   content="Zone Alpha (α) is per-zone outperformance premium above Dubai's base CAGR. Higher alpha = stronger zone momentum. Amber ≥1.0% = premium zone; Blue ≥0.7% = above average; Grey = standard."
                   side="right"
